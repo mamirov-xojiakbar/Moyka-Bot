@@ -83,7 +83,7 @@ export class BotService {
           },
           { where: { user_id: userId } },
         );
-        await ctx.reply(`Tabriklayman, ro'yxatdan o'tdingiz!\nIltimos mashinangiz `, {
+        await ctx.reply(`Tabriklayman, ro'yxatdan o'tdingiz!`, {
           parse_mode: 'HTML',
           ...Markup.removeKeyboard(),
         });
