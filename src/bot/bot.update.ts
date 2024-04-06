@@ -25,6 +25,16 @@ export class BotUpdate {
     await this.botServise.onContact(ctx);
   }
 
+  @Action('mycars')
+  async onClicMyCarsButton(@Ctx() ctx: Context) {
+    await this.botServise.onClicMyCarsButton(ctx);
+  }
+
+  // @Action('addcar')
+  // async onClickAddCarButton(@Ctx() ctx: Context) {
+  //   await this.botServise.onClickAddCarButton(ctx);
+  // }
+
   // @On('photo')
   // async onPhoto(@Ctx() ctx: Context) {
   //   if ('photo' in ctx.message) {

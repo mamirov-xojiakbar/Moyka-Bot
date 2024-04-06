@@ -4,6 +4,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { BOT_NAME } from './app.constants';
 import { BotModule } from './bot/bot.module';
+import { Bot } from './bot/models/bot.model';
+import { Car } from './bot/models/cars.model';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { BotModule } from './bot/bot.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [],
+      models: [Bot, Car],
       autoLoadModels: true,
       sync: { alter: true },
       logging: false,

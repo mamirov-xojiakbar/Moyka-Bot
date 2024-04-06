@@ -4,11 +4,14 @@ import { Bot } from './models/bot.model';
 import { InjectBot } from 'nestjs-telegraf';
 import { BOT_NAME } from '../app.constants';
 import { Context, Markup, Telegraf } from 'telegraf';
+import { Car } from './models/cars.model';
+import { log } from 'console';
 
 @Injectable()
 export class BotService {
   constructor(
     @InjectModel(Bot) private botRepo: typeof Bot,
+    @InjectModel(Car) private carRepo: typeof Car,
     @InjectBot(BOT_NAME) private readonly bot: Telegraf<Context>,
   ) {}
 
@@ -41,9 +44,34 @@ export class BotService {
           .oneTime(),
       });
     } else {
-      await ctx.reply(`Bu bot orqali moyka-bot bilan muloqot ornatiladi!`, {
-        parse_mode: 'HTML',
-        ...Markup.removeKeyboard(),
+      // await ctx.reply(`Bu bot orqali Moyka bilan muloqot ornatiladi!`, {
+      //   parse_mode: 'HTML',
+      //   ...Markup.removeKeyboard(),
+      // });
+      const inlineKeyboard = [
+        [
+          {
+            text: 'My cars',
+            callback_data: 'mycars',
+          },
+        ],
+        [
+          {
+            text: 'Add new car',
+            callback_data: 'addcar',
+          },
+        ],
+        [
+          {
+            text: 'Delete Car',
+            callback_data: 'deletecar',
+          },
+        ],
+      ];
+      await ctx.reply('Buttonlardan birini tanlang:', {
+        reply_markup: {
+          inline_keyboard: inlineKeyboard,
+        },
       });
     }
   }
@@ -85,7 +113,94 @@ export class BotService {
           parse_mode: 'HTML',
           ...Markup.removeKeyboard(),
         });
+        const inlineKeyboard = [
+          [
+            {
+              text: 'My cars',
+              callback_data: 'mycars',
+            },
+          ],
+          [
+            {
+              text: 'Add new car',
+              callback_data: 'addcar',
+            },
+          ],
+          [
+            {
+              text: 'Delete Car',
+              callback_data: 'deletecar',
+            },
+          ],
+        ];
+        await ctx.reply('Buttonlardan birini tanlang:', {
+          reply_markup: {
+            inline_keyboard: inlineKeyboard,
+          },
+        });
       }
     }
   }
+
+  async onClicMyCarsButton(ctx: Context) {
+    const user_id = ctx.from.id;
+    const car = await this.carRepo.findAll({
+      include: { all: true },
+      where: { userId: user_id },
+    });
+    if (car.length == 0) {
+      const inlineKeyboard = [
+        [
+          {
+            text: 'Add new car',
+            callback_data: 'addcar',
+          },
+        ],
+      ];
+      await ctx.reply(
+        'Siz hali mashina qoshmagansz. Iltimos mashina qoshing!',
+        {
+          reply_markup: {
+            inline_keyboard: inlineKeyboard,
+          },
+        },
+      );
+    } else {
+      await ctx.reply(`${car}`);
+    }
+  }
+
+  // async onClickAddCarButton(ctx: any) {
+  //   const sentMessage = await ctx.replyWithText(
+  //     `Mashinangiz modelini kiriting => (nexia 2):`,
+  //   );
+
+  //   const reply = await ctx.telegram.waitForReply(
+  //     sentMessage.chat.id,
+  //     sentMessage.message_id,
+  //   );
+
+  //   if (reply) {
+  //     const carModel = reply.text;
+  //     log(carModel)
+
+  //     // Assuming you have carNumber and carColor defined somewhere
+  //     const carNumber = ''; // Define carNumber
+  //     const carColor = ''; // Define carColor
+
+  //     // Assuming this.carRepo.create() is a function that saves a new car object
+  //     const newCar = this.carRepo.create({
+  //       model: carModel,
+  //       number: carNumber,
+  //       color: carColor,
+  //       userId: ctx.from.id,
+  //     });
+
+  //     // Assuming you want to log the newly created car
+  //     console.log(newCar);
+  //   } else {
+  //     // Handle if no reply is received
+  //     console.log('No reply received');
+  //   }
+  // }
 }
