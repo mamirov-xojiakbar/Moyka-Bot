@@ -12,7 +12,6 @@ export class BotService {
     @InjectBot(BOT_NAME) private readonly bot: Telegraf<Context>,
   ) {}
 
-
   async start(ctx: Context) {
     const userId = ctx.from.id;
     const user = await this.botRepo.findByPk(userId);
@@ -49,7 +48,6 @@ export class BotService {
     }
   }
 
-
   async onContact(ctx: Context) {
     if ('contact' in ctx.message) {
       const userId = ctx.from.id;
@@ -61,11 +59,6 @@ export class BotService {
             .resize()
             .oneTime(),
         });
-      } else if (user.status) {
-        await ctx.reply(`Kechirasiz siz royxatdan o'tib bolgansiz`, {
-          parse_mode: 'HTML',
-          ...Markup.removeKeyboard(),
-        });
       } else if (ctx.message.contact.user_id != userId) {
         await ctx.reply(`Iltimos, o'zingizni raqamizi yuboring!`, {
           parse_mode: 'HTML',
@@ -74,6 +67,11 @@ export class BotService {
           ])
             .resize()
             .oneTime(),
+        });
+      } else if (user.status) {
+        await ctx.reply(`Kechirasiz siz royxatdan o'tib bolgansiz`, {
+          parse_mode: 'HTML',
+          ...Markup.removeKeyboard(),
         });
       } else {
         await this.botRepo.update(
