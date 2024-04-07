@@ -16,6 +16,34 @@ export class BotService {
   ) {}
 
   async start(ctx: Context) {
+    const inlineKeyboard = [
+      [
+        {
+          text: "O'zbek tili 🇺🇿",
+          callback_data: 'uzbek',
+        },
+        {
+          text: 'Pусский язык 🇷🇺',
+          callback_data: 'rus',
+        },
+      ],
+    ];
+    await ctx.reply(
+      `Buttonlardan birini tanlang 🇺🇿
+
+
+Выберите одну из кнопок 🇷🇺
+    `,
+      {
+        reply_markup: {
+          inline_keyboard: inlineKeyboard,
+        },
+      },
+    );
+  }
+
+  // ============= Uzbek tili bolimi ============
+  async onClickUzbekButton(ctx: Context) {
     const userId = ctx.from.id;
     const user = await this.botRepo.findByPk(userId);
     if (!user) {
@@ -26,28 +54,24 @@ export class BotService {
         last_name: ctx.from.last_name,
       });
 
-      await ctx.reply(`please, send your phone number`, {
+      await ctx.reply(`Iltimos telefon raqamingizni yuboring!`, {
         parse_mode: 'HTML',
         ...Markup.keyboard([
-          [Markup.button.contactRequest('📞 sending phone number')],
+          [Markup.button.contactRequest('📞 Telefon raqamini yuborish')],
         ])
           .resize()
           .oneTime(),
       });
     } else if (!user.status) {
-      await ctx.reply(`please, send your phone number`, {
+      await ctx.reply(`Iltimos telefon raqamingizni yuboring!`, {
         parse_mode: 'HTML',
         ...Markup.keyboard([
-          [Markup.button.contactRequest('📞 Sending phone number')],
+          [Markup.button.contactRequest('📞 Telefon raqamini yuborish')],
         ])
           .resize()
           .oneTime(),
       });
     } else {
-      // await ctx.reply(`Bu bot orqali Moyka bilan muloqot ornatiladi!`, {
-      //   parse_mode: 'HTML',
-      //   ...Markup.removeKeyboard(),
-      // });
       const inlineKeyboard = [
         [
           {
@@ -91,7 +115,7 @@ export class BotService {
         await ctx.reply(`Iltimos, o'zingizni raqamizi yuboring!`, {
           parse_mode: 'HTML',
           ...Markup.keyboard([
-            [Markup.button.contactRequest('📞 Sending phone number')],
+            [Markup.button.contactRequest('📞 Telefon raqamini yuborish')],
           ])
             .resize()
             .oneTime(),
@@ -170,37 +194,73 @@ export class BotService {
     }
   }
 
-  // async onClickAddCarButton(ctx: any) {
-  //   const sentMessage = await ctx.replyWithText(
-  //     `Mashinangiz modelini kiriting => (nexia 2):`,
-  //   );
+  async onClickAddCarButton(ctx: Context) {
+    const newCar = await this.carRepo.create({
+      model: null,
+      number: null,
+      color: null,
+      userId: ctx.from.id,
+      text_status: 'car_model', 
+    });
 
-  //   const reply = await ctx.telegram.waitForReply(
-  //     sentMessage.chat.id,
-  //     sentMessage.message_id,
-  //   );
+    if (newCar.text_status == 'car_model') {
+      await ctx.reply(`Iltimos mashinangiz modelini kiriting!`);
+      newCar.text_status = 'car_number';
+      await newCar.save();
+    }
+  }
 
-  //   if (reply) {
-  //     const carModel = reply.text;
-  //     log(carModel)
+  async onText(ctx: Context) {
+    const cars = await this.carRepo.findOne({ where: { model: null } }); 
+ 
+    if (!cars) {
+      const inlineKeyboard = [
+        [ 
+          {
+            text: "Yangi mashina qo'shish",
+            callback_data: 'addcar',
+          },
+        ],
+      ];
+      await ctx.reply(
+        "Siz hali mashina qo'shmagansiz. Iltimos mashina qo'shing!",
+        {
+          reply_markup: {
+            inline_keyboard: inlineKeyboard,
+          },
+        },
+      );
+    } else {
+      if ('text' in ctx.message) {
+        if (cars.text_status === 'car_number') {
+          cars.model = ctx.message.text;
+          await ctx.reply(
+            'Iltimos mashinangizning davlat raqamini kiriting (masalan: 60A034AA):',
+          );
+          cars.text_status = 'car_color';
+          await cars.save();
+        } else if (cars.text_status === 'car_color') {
+          cars.number = ctx.message.text;
+          await ctx.reply(
+            'Iltimos mashinangizning rangini kiriting (masalan: qora):',
+          );
+          cars.text_status = 'text_status';
+          await cars.save();
+        } else {
+          cars.color = ctx.message.text;
+          await this.carRepo.update(
+            {
+              model: cars.model,
+              number: cars.number,
+              color: cars.color,
+            },
+            { where: { userId: ctx.from.id } },
+          );
+          await ctx.reply("Tabriklayman, mashina muvaffaqiyatli qo'shildi😉");
+        }
+      }
+    }
+  }
 
-  //     // Assuming you have carNumber and carColor defined somewhere
-  //     const carNumber = ''; // Define carNumber
-  //     const carColor = ''; // Define carColor
-
-  //     // Assuming this.carRepo.create() is a function that saves a new car object
-  //     const newCar = this.carRepo.create({
-  //       model: carModel,
-  //       number: carNumber,
-  //       color: carColor,
-  //       userId: ctx.from.id,
-  //     });
-
-  //     // Assuming you want to log the newly created car
-  //     console.log(newCar);
-  //   } else {
-  //     // Handle if no reply is received
-  //     console.log('No reply received');
-  //   }
-  // }
+  //  ============= Rus tili bolimi xali beri tayyor emas ============
 }

@@ -20,20 +20,36 @@ export class BotUpdate {
     this.botServise.start(ctx);
   }
 
+  @Action('uzbek')
+  async onClickUzbekButton(@Ctx() ctx: Context) {
+    this.botServise.onClickUzbekButton(ctx);
+  }
+
+  @Action('rus')
+  async onClickRusButton(@Ctx() ctx: Context) {
+    await ctx.reply(`Bu qismi xali beri tayyor emas. Iltimos Uzbek tili bolimini tanlang😄`);
+  }
+
   @On('contact')
   async onContact(@Ctx() ctx: Context) {
     await this.botServise.onContact(ctx);
   }
+
 
   @Action('mycars')
   async onClicMyCarsButton(@Ctx() ctx: Context) {
     await this.botServise.onClicMyCarsButton(ctx);
   }
 
-  // @Action('addcar')
-  // async onClickAddCarButton(@Ctx() ctx: Context) {
-  //   await this.botServise.onClickAddCarButton(ctx);
-  // }
+  @Action('addcar')
+  async onClickAddCarButton(@Ctx() ctx: Context) {
+    await this.botServise.onClickAddCarButton(ctx);
+  }
+
+  @On("text")
+  async onText(@Ctx() ctx: Context) {
+    await this.botServise.onText(ctx)
+  }
 
   // @On('photo')
   // async onPhoto(@Ctx() ctx: Context) {

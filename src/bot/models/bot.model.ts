@@ -7,6 +7,8 @@ interface IBotCreationAttr {
   last_name: string;
   phone_number: string;
   status: boolean;
+  is_admin: boolean;
+  is_worker: boolean;
 }
 
 @Table({ tableName: 'bot' })
@@ -37,4 +39,16 @@ export class Bot extends Model<Bot, IBotCreationAttr> {
     defaultValue: false,
   })
   status: boolean;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: false,
+  })
+  is_admin: boolean;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: false,
+  })
+  is_worker: boolean;
 }
