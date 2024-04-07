@@ -64,6 +64,7 @@ export class BotUpdate {
       const car = await this.carRepo.findOne({
         where: { userId: ctx.from.id },
       });
+      log(car.id)
       if (car) {
         carId = car.id;
       } else {

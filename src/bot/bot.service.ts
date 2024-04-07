@@ -229,12 +229,13 @@ export class BotService {
       await ctx.reply(`Iltimos mashinangiz modelini kiriting!`);
       newCar.text_status = 'car_number';
       await newCar.save();
+      log(newCar)
     }
   }
 
   async onText(ctx: Context) {
     const cars = await this.carRepo.findOne({ where: { color: null } });
-
+    log(cars)
     if ('text' in ctx.message) {
       if (cars.text_status === 'car_number') {
         cars.model = ctx.message.text;
@@ -243,13 +244,17 @@ export class BotService {
         );
         cars.text_status = 'car_color';
         await cars.save();
+
+        log(cars)
       } else if (cars.text_status === 'car_color') {
+        log(cars)
         cars.number = ctx.message.text;
         await ctx.reply(
           'Iltimos mashinangizning rangini kiriting (masalan: qora):',
         );
         cars.text_status = 'text_status';
         await cars.save();
+        log(cars)
       } else {
         cars.color = ctx.message.text;
         await this.carRepo.update(
