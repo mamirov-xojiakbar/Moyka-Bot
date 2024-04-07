@@ -190,7 +190,31 @@ export class BotService {
         },
       );
     } else {
-      await ctx.reply(`${car}`);
+      const deleteKeyboard = [
+        [
+          {
+            text: 'Delete this car',
+            callback_data: 'deletecarid',
+          },
+        ],
+      ];
+      for (let i of car) {
+        await ctx.reply(
+          `🆔: ${i.id}
+
+      🚗 Modeli: ${i.model}
+
+      🔴 Rangi: ${i.color}
+
+      🇺🇿 Davlat raqami: ${i.number}
+        `,
+          {
+            reply_markup: {
+              inline_keyboard: deleteKeyboard,
+            },
+          },
+        );
+      }
     }
   }
 
@@ -238,8 +262,56 @@ export class BotService {
           },
           { where: { userId: ctx.from.id } },
         );
-        await ctx.reply("Tabriklayman, mashina muvaffaqiyatli qo'shildi😉");
+        await ctx.reply("Tabriklayman, mashina muvaffaqiyatli qo'shildi ✅");
+        const inlineKeyboard = [
+          [
+            {
+              text: 'My cars',
+              callback_data: 'mycars',
+            },
+          ],
+          [
+            {
+              text: 'Add new car',
+              callback_data: 'addcar',
+            },
+          ],
+          [
+            {
+              text: 'Delete Car',
+              callback_data: 'deletecar',
+            },
+          ],
+        ];
+        await ctx.reply(
+          'Yana xizmatimizdan foydalanish uchun buttonlardan birini tanlang 👇',
+          {
+            reply_markup: {
+              inline_keyboard: inlineKeyboard,
+            },
+          },
+        );
       }
+    }
+  }
+
+  async deleteCar(ctx: Context, carId: number) {
+    try {
+      const deletedCarCount = await this.carRepo.destroy({
+        where: {
+          id: carId,
+          userId: ctx.from.id, 
+        },
+      });
+
+      if (deletedCarCount > 0) {
+        await ctx.reply(`Avtomobil muvaffaqiyatli oʻchirildi ✅`);
+      } else {
+        await ctx.reply(`Avtomobil topilmadi yoki oʻchirilmadi 🤷‍♂️`);
+      }
+    } catch (error) {
+      console.error("Avtomobilni o'chirishda xatolik yuz berdi:", error);
+      await ctx.reply(`Sizda hech qanday mashina yoq❌`);
     }
   }
 

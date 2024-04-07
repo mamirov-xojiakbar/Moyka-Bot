@@ -10,10 +10,15 @@ import {
 } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { BotService } from './bot.service';
+import { InjectModel } from '@nestjs/sequelize';
+import { Car } from './models/cars.model';
 
 @Update()
 export class BotUpdate {
-  constructor(private readonly botServise: BotService) {}
+  constructor(
+    private readonly botServise: BotService,
+    @InjectModel(Car) private carRepo: typeof Car,
+  ) {}
 
   @Start()
   async onStart(@Ctx() ctx: Context) {
@@ -27,14 +32,15 @@ export class BotUpdate {
 
   @Action('rus')
   async onClickRusButton(@Ctx() ctx: Context) {
-    await ctx.reply(`Bu qismi xali beri tayyor emas. Iltimos Uzbek tili bolimini tanlang😄`);
+    await ctx.reply(
+      `Bu qismi xali beri tayyor emas. Iltimos Uzbek tili bolimini tanlang😄`,
+    );
   }
 
   @On('contact')
   async onContact(@Ctx() ctx: Context) {
     await this.botServise.onContact(ctx);
   }
-
 
   @Action('mycars')
   async onClicMyCarsButton(@Ctx() ctx: Context) {
@@ -46,9 +52,33 @@ export class BotUpdate {
     await this.botServise.onClickAddCarButton(ctx);
   }
 
-  @On("text")
+  @Action('deletecar')
+  async onClickDeleteCarButton(@Ctx() ctx: Context) {
+    await this.botServise.onClicMyCarsButton(ctx);
+  }
+
+  @Action('deletecarid')
+  async onClickDeleteCarIdButton(ctx: Context) {
+    try {
+      let carId;
+      const car = await this.carRepo.findOne({
+        where: { userId: ctx.from.id },
+      });
+      if (car) {
+        carId = car.id;
+      } else {
+        console.log('Mashina topilmadi.');
+      }
+      await this.botServise.deleteCar(ctx, parseInt(carId));
+    } catch (error) {
+      console.error("Avtomobilni o'chirishda xatolik yuz berdi:", error);
+      await ctx.reply(`Sizda hech qanday mashina yoq❌`);
+    }
+  }
+
+  @On('text')
   async onText(@Ctx() ctx: Context) {
-    await this.botServise.onText(ctx)
+    await this.botServise.onText(ctx);
   }
 
   // @On('photo')
