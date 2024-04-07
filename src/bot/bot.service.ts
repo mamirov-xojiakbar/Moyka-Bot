@@ -200,7 +200,7 @@ export class BotService {
       number: null,
       color: null,
       userId: ctx.from.id,
-      text_status: 'car_model', 
+      text_status: 'car_model',
     });
 
     if (newCar.text_status == 'car_model') {
@@ -211,53 +211,34 @@ export class BotService {
   }
 
   async onText(ctx: Context) {
-    const cars = await this.carRepo.findOne({ where: { model: null } }); 
- 
-    if (!cars) {
-      const inlineKeyboard = [
-        [ 
+    const cars = await this.carRepo.findOne({ where: { color: null } });
+
+    if ('text' in ctx.message) {
+      if (cars.text_status === 'car_number') {
+        cars.model = ctx.message.text;
+        await ctx.reply(
+          'Iltimos mashinangizning davlat raqamini kiriting (masalan: 60A034AA):',
+        );
+        cars.text_status = 'car_color';
+        await cars.save();
+      } else if (cars.text_status === 'car_color') {
+        cars.number = ctx.message.text;
+        await ctx.reply(
+          'Iltimos mashinangizning rangini kiriting (masalan: qora):',
+        );
+        cars.text_status = 'text_status';
+        await cars.save();
+      } else {
+        cars.color = ctx.message.text;
+        await this.carRepo.update(
           {
-            text: "Yangi mashina qo'shish",
-            callback_data: 'addcar',
+            model: cars.model,
+            number: cars.number,
+            color: cars.color,
           },
-        ],
-      ];
-      await ctx.reply(
-        "Siz hali mashina qo'shmagansiz. Iltimos mashina qo'shing!",
-        {
-          reply_markup: {
-            inline_keyboard: inlineKeyboard,
-          },
-        },
-      );
-    } else {
-      if ('text' in ctx.message) {
-        if (cars.text_status === 'car_number') {
-          cars.model = ctx.message.text;
-          await ctx.reply(
-            'Iltimos mashinangizning davlat raqamini kiriting (masalan: 60A034AA):',
-          );
-          cars.text_status = 'car_color';
-          await cars.save();
-        } else if (cars.text_status === 'car_color') {
-          cars.number = ctx.message.text;
-          await ctx.reply(
-            'Iltimos mashinangizning rangini kiriting (masalan: qora):',
-          );
-          cars.text_status = 'text_status';
-          await cars.save();
-        } else {
-          cars.color = ctx.message.text;
-          await this.carRepo.update(
-            {
-              model: cars.model,
-              number: cars.number,
-              color: cars.color,
-            },
-            { where: { userId: ctx.from.id } },
-          );
-          await ctx.reply("Tabriklayman, mashina muvaffaqiyatli qo'shildi😉");
-        }
+          { where: { userId: ctx.from.id } },
+        );
+        await ctx.reply("Tabriklayman, mashina muvaffaqiyatli qo'shildi😉");
       }
     }
   }
