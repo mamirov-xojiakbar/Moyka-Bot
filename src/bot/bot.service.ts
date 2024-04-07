@@ -200,13 +200,11 @@ export class BotService {
       ];
       for (let i of car) {
         await ctx.reply(
-          `🆔: ${i.id}
+          `🚗 Modeli: ${i.model}
 
-      🚗 Modeli: ${i.model}
+🔴 Rangi: ${i.color}
 
-      🔴 Rangi: ${i.color}
-
-      🇺🇿 Davlat raqami: ${i.number}
+🇺🇿 Davlat raqami: ${i.number}
         `,
           {
             reply_markup: {
@@ -263,34 +261,6 @@ export class BotService {
           { where: { userId: ctx.from.id } },
         );
         await ctx.reply("Tabriklayman, mashina muvaffaqiyatli qo'shildi ✅");
-        const inlineKeyboard = [
-          [
-            {
-              text: 'My cars',
-              callback_data: 'mycars',
-            },
-          ],
-          [
-            {
-              text: 'Add new car',
-              callback_data: 'addcar',
-            },
-          ],
-          [
-            {
-              text: 'Delete Car',
-              callback_data: 'deletecar',
-            },
-          ],
-        ];
-        await ctx.reply(
-          'Yana xizmatimizdan foydalanish uchun buttonlardan birini tanlang 👇',
-          {
-            reply_markup: {
-              inline_keyboard: inlineKeyboard,
-            },
-          },
-        );
       }
     }
   }
@@ -300,7 +270,7 @@ export class BotService {
       const deletedCarCount = await this.carRepo.destroy({
         where: {
           id: carId,
-          userId: ctx.from.id, 
+          userId: ctx.from.id,
         },
       });
 
@@ -311,7 +281,7 @@ export class BotService {
       }
     } catch (error) {
       console.error("Avtomobilni o'chirishda xatolik yuz berdi:", error);
-      await ctx.reply(`Sizda hech qanday mashina yoq❌`);
+      await ctx.reply(`Sizda hech qanday mashina yoq ❌`);
     }
   }
 
